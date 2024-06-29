@@ -1,8 +1,11 @@
-import { Postman } from "./actorsystem/postMan.ts";
-import { main } from "./actors/main.ts";
+import { PostalService } from "./actorsystem/PostalService.ts";
 
-const postman = new Postman("localhost:8000");
+const postalservice = new PostalService();
 
-const mainAddress = await postman.add("main.ts");
+const mainAddress = await postalservice.add("worker.ts");
 
-postman.PostMessage(mainAddress, "program", null);
+postalservice.Post({
+  address: { fm: "system", to: mainAddress },
+  type: "MAIN",
+  payload: null,
+});
