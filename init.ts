@@ -2,7 +2,7 @@ import { PostalService } from "./actorsystem/PostalService.ts";
 
 const postalservice = new PostalService();
 
-const mainAddress = await postalservice.add("worker.ts");
+const mainAddress = await postalservice.add("main.ts");
 
 postalservice.Post({
   address: { fm: "system", to: mainAddress },

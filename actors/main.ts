@@ -4,7 +4,7 @@ import {
   Payload,
   worker,
 } from "../actorsystem/types.ts";
-import { OnMessage, Postman, trpc } from "../actorsystem/PostMan.ts";
+import { OnMessage, Postman, trpc } from "./PostMan.ts";
 
 type State = {
   id: string;
@@ -13,6 +13,7 @@ type State = {
 };
 
 const state: State & BaseState = {
+  name: "main",
   id: "",
   db: {},
   numbah: 0,
@@ -24,20 +25,18 @@ const functions: ActorFunctions = {
   MAIN: (payload) => {
     main(payload);
   },
-  FILE: async (payload) => {
-    const text = await trpc.readFile.query(payload);
-    console.log("File contents:", text);
-  },
   LOG: (_payload) => {
     console.log(state.id);
   },
 };
 
+
+
 async function main(_payload: Payload["MAIN"]) {
   console.log("main!");
 
   //#region signaling
-  /* const signalingServer = await Postman.create(
+  const signalingServer = await Postman.create(
     worker,
     "signalingDenoServer.ts",
     state,
@@ -45,11 +44,13 @@ async function main(_payload: Payload["MAIN"]) {
   Postman.PostMessage(worker, {
     address: { fm: state.id, to: signalingServer },
     type: "STARTSERVER",
-    payload: 8080,
-  }); */
+    payload: 8081,
+  });
   //#endregion
 
-  const id = await Postman.create(worker, "worker.ts", state);
+
+
+  const id = await Postman.create(worker, "subactor.ts", state);
   console.log("created", id);
 
   Postman.PostMessage(worker, {

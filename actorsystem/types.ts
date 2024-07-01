@@ -2,9 +2,11 @@ import { type } from "arktype";
 
 export const worker = self as unknown as ActorWorker;
 
-export type ToAddress = string & { __brand: "ActorId" };
+export const xToAddress = type("string", "&", { __brand: "'ActorId'" });
+export type ToAddress = typeof xToAddress.infer;
 
 export type BaseState = {
+  name: string;
   id: string;
   [key: string]: unknown;
 };
@@ -39,72 +41,22 @@ export const xMessageAddressSingle = type(
   xWorkerToSystem,
 );
 export const xMessageAddressArray = type(xPairAddress.array());
-export type MessageAddressSingle = typeof xMessageAddressSingle.infer;
+export const xMessageAddressReal = type({
+  fm: "string",
+  to: xToAddress,
+})
+
+export type MessageAddressReal = typeof xMessageAddressReal.infer;
 export type MessageAddress =
   | typeof xMessageAddressSingle.infer
   | typeof xMessageAddressArray.infer;
 
 //#endregion
 
-export const xMessageTypeSys = type(
-  "'KEEPALIVE'|'LOADED'|'CREATE'|'MURDER'",
-);
-export const xMessageTypeActor = type(
-  "'INIT'|'REGISTER'",
-);
-export const xMessageTypeRTC = type(
-  "'CONNECT'|'RELAYMSG'|'NETWORKACTOR'",
-);
-export const xMessageTypeFunctions = type(
-  "'MAIN'|'FILE'|'SHUT'|'OTHER_TYPE2'|'STARTSERVER'|'LOG'",
-);
-export const xMessageType = type(
-  xMessageTypeSys,
-).or(
-  xMessageTypeActor,
-).or(
-  xMessageTypeRTC,
-).or(
-  xMessageTypeFunctions,
-);
-export type MessageType = typeof xMessageType.infer;
-
 //#region payloads
-export const xPayload = type({
-  type: "'CONNECT'",
-  payload: "string",
-}).or({
-  type: "'NETWORKACTOR'",
-  payload: "string",
-}).or({
-  type: "'RELAYMSG'",
-  payload: "string",
-}).or({
-  type: "'STARTSERVER'",
-  payload: "number",
-}).or({
-  type: "'MURDER'",
-  payload: "string",
-}).or({
+
+export const xPayloadSys = type({
   type: "'KEEPALIVE'",
-  payload: "null",
-}).or({
-  type: "'FILE'",
-  payload: "string",
-}).or({
-  type: "'MAIN'",
-  payload: "null",
-}).or({
-  type: "'LOG'",
-  payload: "null",
-}).or({
-  type: "'OTHER_TYPE2'",
-  payload: "string",
-}).or({
-  type: "'STARTSERVER'",
-  payload: "number",
-}).or({
-  type: "'SHUT'",
   payload: "null",
 }).or({
   type: "'LOADED'",
@@ -113,20 +65,44 @@ export const xPayload = type({
   type: "'CREATE'",
   payload: "string",
 }).or({
-  type: "'INIT'",
-  payload: "string|null",
-}).or({
-  type: "'REGISTER'",
+  type: "'MURDER'",
   payload: "string",
+})
+
+export const xPayloadMain = type({
+  type: "'MAIN'",
+  payload: "null|string",
 });
 
+export const xPayloadActor = type({
+  type: "'LOG'",
+  payload: "null",
+}).or({
+  type: "'INIT'",
+  payload: "null",
+}).or({
+  type: "'REGISTER'",
+  payload: xToAddress,
+})
+
+export const xPayload = type(
+  xPayloadSys,
+).or(
+  xPayloadMain,
+).or(
+  xPayloadActor,
+);
+
 export type xPayload = typeof xPayload.infer;
+export type MessageType = typeof xPayload.infer.type;
+
 export type Payload = {
   [K in MessageType]: Extract<
     xPayload,
     { type: K }
   >["payload"];
 };
+
 //#endregion
 
 export const xMessage = type([
@@ -167,7 +143,7 @@ export class ActorWorker extends Worker {
   ): void {
     message.address = JSON.stringify(
       message.address,
-    ) as unknown as MessageAddressSingle;
+    ) as unknown as MessageAddressReal;
     if (Array.isArray(transferOrOptions)) {
       super.postMessage(message, transferOrOptions);
     } else {

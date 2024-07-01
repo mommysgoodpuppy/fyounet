@@ -3,7 +3,7 @@ import {
   ActorFunctions,
   BaseState,
   Message,
-  MessageAddressSingle,
+  MessageAddressReal,
   PairAddress,
   Payload,
   PayloadHandler,
@@ -13,7 +13,7 @@ import {
 } from "../actorsystem/types.ts";
 import { WebRTCServer } from "../classes/webrtcClass.ts";
 import { getAvailablePort } from "https://raw.githubusercontent.com/jakubdolejs/deno-port/main/mod.ts";
-import { OnMessage, Postman } from "../actorsystem/PostMan.ts";
+import { OnMessage, Postman } from "./PostMan.ts";
 
 type socket = Map<string, WebSocket>;
 
@@ -24,6 +24,7 @@ type State = BaseState & {
 };
 
 const state: State = {
+  name: "portal",
   id: "",
   sockets: new Map<string, WebSocket>(),
   portals: [],

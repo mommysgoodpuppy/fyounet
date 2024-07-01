@@ -1,19 +1,19 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import { Signal } from "./utils.ts";
+import { type } from "arktype";
+import { Signal } from "../actorsystem/utils.ts";
 import {
   ActorFunctions,
   ActorWorker,
   BaseState,
   Message,
-  nonArrayAddress,
   notAddressArray,
   Payload,
   PayloadHandler,
   System,
   ToAddress,
   worker,
-} from "./types.ts";
-import type { AppRouter } from "./router.ts";
+} from "../actorsystem/types.ts";
+import type { AppRouter } from "../actorsystem/router.ts";
 
 export const trpc = createTRPCProxyClient<AppRouter>({
   links: [
@@ -32,12 +32,14 @@ export const OnMessage = (handler: (message: Message) => void) => {
 export class Postman {
   static worker: ActorWorker;
   static state: BaseState;
-  static signal: Signal<ToAddress>;
+  static creationSignal: Signal<ToAddress>;
+  static callbackSignal: Signal<any>;
+  static portals: Array<ToAddress>;
 
   static functions: ActorFunctions = {
     //initialize actor
     INIT: (payload) => {
-      Postman.state.id = `subM${crypto.randomUUID()}`;
+      Postman.state.id = `${Postman.state.name}${crypto.randomUUID()}`;
       Postman.PostMessage(worker, {
         address: { fm: Postman.state.id, to: System },
         type: "LOADED",
@@ -46,9 +48,12 @@ export class Postman {
       console.log("initied sub actor with args:", payload);
     },
 
+    ROUTERESPONSE: (payload) => {
+    },
+
     //register self to system
     REGISTER: (payload) => {
-      Postman.signal.trigger(payload as ToAddress);
+      Postman.creationSignal.trigger(payload as ToAddress);
     },
 
     //terminate
@@ -82,7 +87,7 @@ export class Postman {
     } else throw new Error("not address array");
   }
 
-  static PostMessage(worker: ActorWorker, message: Message) {
+  static async PostMessage(worker: ActorWorker, message: Message) {
     worker.postMessage(message);
   }
 
@@ -91,7 +96,7 @@ export class Postman {
     actorname: string,
     state: BaseState,
   ): Promise<ToAddress> {
-    Postman.signal = new Signal<ToAddress>();
+    Postman.creationSignal = new Signal<ToAddress>();
 
     worker.postMessage({
       address: { fm: state.id, to: System },
@@ -99,7 +104,7 @@ export class Postman {
       payload: actorname,
     });
 
-    const result = await Postman.signal.wait();
+    const result = await Postman.creationSignal.wait();
 
     return result;
   }

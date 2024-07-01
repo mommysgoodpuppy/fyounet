@@ -1,10 +1,11 @@
-import { ActorFunctions, MessageAddress, MessageAddressSingle } from "./types.ts";
+import { ActorFunctions, MessageAddress, MessageAddressReal } from "./types.ts";
 import { Signal } from "./utils.ts";
 import {
   ActorWorker,
   Message,
   nonArrayAddress,
   notAddressArray,
+  PairAddress,
   Payload,
   PayloadHandler,
   System,
@@ -125,7 +126,7 @@ export class PostalService {
     if (typeof rMessage.address === "object") {
       rMessage.address = JSON.stringify(
         rMessage.address,
-      ) as unknown as MessageAddressSingle;
+      ) as unknown as MessageAddressReal;
     }
 
     const address = JSON.parse(rMessage.address as unknown as string);

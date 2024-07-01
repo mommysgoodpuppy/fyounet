@@ -1,4 +1,4 @@
-import { OnMessage, Postman } from "../actorsystem/PostMan.ts";
+import { OnMessage, Postman } from "./PostMan.ts";
 import { ActorFunctions, BaseState, worker } from "../actorsystem/types.ts";
 
 import { SignalingServer } from "../classes/signalingClass.ts";

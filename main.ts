@@ -25,7 +25,7 @@ const handler = async (request: Request): Promise<Response> => {
 };
 
 const worker = new ActorWorker(
-  new URL("./worker.ts", import.meta.url).href,
+  new URL("./main.ts", import.meta.url).href,
   { type: "module" },
 );
 
