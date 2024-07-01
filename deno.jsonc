@@ -3,8 +3,7 @@
     "@trpc/server": "https://esm.sh/@trpc/server@10.38.0",
     "@trpc/server/": "https://esm.sh/@trpc/server@10.38.0/",
     "@trpc/client": "https://esm.sh/@trpc/client@10.38.0",
-    "arktype": "https://esm.sh/arktype@2.0.0-dev.26",
-    "arktype/": "https://esm.sh/arktype@2.0.0-dev.26",
+    "arktype": "https://esm.sh/arktype@2.0.0-dev.25",
     "zod": "https://esm.sh/zod@3.21.4"
   },
   "lint": {
