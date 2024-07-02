@@ -1,7 +1,6 @@
 import { ActorFunctions, MessageAddress, MessageAddressReal } from "./types.ts";
 import { Signal } from "./utils.ts";
 import {
-  ActorWorker,
   Message,
   nonArrayAddress,
   notAddressArray,
@@ -11,15 +10,17 @@ import {
   System,
   ToAddress,
 } from "./types.ts";
+import { ActorWorker } from "./ActorWorker.ts";
 
 export class PostalService {
-  public static actors: Map<string, Worker> = new Map();
+  public static actors: Map<string, ActorWorker> = new Map();
+  public static remoteActors: Array<ToAddress> = [];
   static signal: Signal<ToAddress>;
 
   async add(address: string): Promise<ToAddress> {
     PostalService.signal = new Signal<ToAddress>();
 
-    const worker: ActorWorker = new Worker(
+    const worker: ActorWorker = new ActorWorker(
       new URL(`../actors/${address}`, import.meta.url).href,
       {
         type: "module",
@@ -61,7 +62,7 @@ export class PostalService {
 
     addresses.forEach((_address) => {
       const address: nonArrayAddress = message.address as nonArrayAddress;
-
+      console.log("postalService handleMessage", message);
       // redirect message
       switch (address.to) {
         case null:
@@ -72,7 +73,8 @@ export class PostalService {
         default:
           // message address is to another actor
           if (!PostalService.actors.has(address.to)) {
-            throw new Error("No actor found");
+            console.error("No actor found");
+            // using portal instead
           }
           const targetWorker = PostalService.actors.get(address.to)!;
           targetWorker.postMessage(message);
@@ -104,14 +106,17 @@ export class PostalService {
       LOADED: (payload) => {
         PostalService.signal.trigger(payload as ToAddress);
       },
+      DELETE: (payload) => {
+        PostalService.actors.delete(payload as ToAddress);
+      },
 
       //actor murders someone
       MURDER: (payload) => {
         this.murder(payload);
       },
-      /* addPortal: (payload) => {
-        PostalService.Portals.set(payload[0], payload[1]);
-      }, */
+      ADDREMOTE: (payload) => {
+        PostalService.remoteActors.push(payload);
+      },
     };
 
     const address = message.address as nonArrayAddress;

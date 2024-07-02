@@ -47,6 +47,14 @@
     }
   },
   "remote": {
+    "https://deno.land/std@0.125.0/async/deadline.ts": "edbdf6cd7a5e3337c4c24c9b616491f8f1d61d36fc415d5d5b4af33557de0d23",
+    "https://deno.land/std@0.125.0/async/debounce.ts": "3cf9306b4e9038ee3238111e338f412ecf3541b1a97ba9fc1f960be8af5a5f39",
+    "https://deno.land/std@0.125.0/async/deferred.ts": "677692a2399d4cabbc45e06abe4f585afd6196c59e24a98edb866598af9f0eef",
+    "https://deno.land/std@0.125.0/async/delay.ts": "f38013c800f5129b14fdbf41fb4f4fbaf9525f69f4266946e14d0cf57c830b0c",
+    "https://deno.land/std@0.125.0/async/mod.ts": "a28709190a1966cb50e5815ef269bb588ee192373cde73b1096641820dc52a36",
+    "https://deno.land/std@0.125.0/async/mux_async_iterator.ts": "35561f258d32c77170f9d1faf3d650890fb6502d5fe12f505c050b4ea1aee899",
+    "https://deno.land/std@0.125.0/async/pool.ts": "97b0dd27c69544e374df857a40902e74e39532f226005543eabacb551e277082",
+    "https://deno.land/std@0.125.0/async/tee.ts": "518c7bfd5184c8cd92b47115026a6a2243e81d83e2c3e71c2aa5cdb5988998b1",
     "https://esm.sh/@trpc/client@10.38.0": "99098f4485bef76ae5e421db7f8fc8a4f2eabd1f91530116c72bd58fb0ab63ca",
     "https://esm.sh/@trpc/server@10.38.0": "0c4203ad9499eb3543940f143e905f72a86d1a90f217ac2440147433e739ba95",
     "https://esm.sh/@trpc/server@10.38.0/adapters/fetch": "eb0bd9516004b42eff8a3d119acc4dbcc444682bf269a95056dfe18ca099282e",
@@ -273,6 +281,8 @@
     "https://esm.sh/v135/arktype@2.0.0-dev.26/denonext/internal/scope.js": "71abe0da92554f14155080129e5ac668faba008ab2e8b8d271bc561fa2502bbd",
     "https://esm.sh/v135/arktype@2.0.0-dev.26/denonext/internal/type.js": "b829db78f4a6894f905607442cc1b83e926f548817946675a085eaf3aab5133a",
     "https://esm.sh/v135/zod@3.21.4/denonext/zod.mjs": "3e104633fb5d127189f1a38f52f5620a21ec8988d639b5adcf5a65be1cbbcc62",
-    "https://esm.sh/zod@3.21.4": "dc4f42ed520b2e45b3463eaf7952c26b20cb315921c826c67eb55d9ec1898a08"
+    "https://esm.sh/zod@3.21.4": "dc4f42ed520b2e45b3463eaf7952c26b20cb315921c826c67eb55d9ec1898a08",
+    "https://raw.githubusercontent.com/jakubdolejs/deno-port/main/mod.ts": "a9c504662f29708502b6f19901542718b0d2afe178c8c7f843debb53923a5ee8",
+    "https://raw.githubusercontent.com/jakubdolejs/deno-port/main/types.ts": "42d6ae4147d5d67408d60209da070ddfa79ec8389c6cab1b8002df0cf6c03af6"
   }
 }

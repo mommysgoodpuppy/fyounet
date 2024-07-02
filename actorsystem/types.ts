@@ -1,8 +1,9 @@
 import { type } from "arktype";
+import { ActorWorker } from "./ActorWorker.ts";
 
 export const worker = self as unknown as ActorWorker;
 
-export const xToAddress = type("string", "&", { __brand: "'ActorId'" });
+export const xToAddress = type("string");
 export type ToAddress = typeof xToAddress.infer;
 
 export type BaseState = {
@@ -44,7 +45,7 @@ export const xMessageAddressArray = type(xPairAddress.array());
 export const xMessageAddressReal = type({
   fm: "string",
   to: xToAddress,
-})
+});
 
 export type MessageAddressReal = typeof xMessageAddressReal.infer;
 export type MessageAddress =
@@ -67,7 +68,16 @@ export const xPayloadSys = type({
 }).or({
   type: "'MURDER'",
   payload: "string",
-})
+}).or({
+  type: "'FIND_ROUTE'",
+  payload: [xToAddress, "'CBROUTE'"],
+}).or({
+  type: "'SHUT'",
+  payload: "null",
+}).or({
+  type: "'DELETE'",
+  payload: xToAddress,
+});
 
 export const xPayloadMain = type({
   type: "'MAIN'",
@@ -83,7 +93,23 @@ export const xPayloadActor = type({
 }).or({
   type: "'REGISTER'",
   payload: xToAddress,
-})
+});
+
+export const xPayloadRTC = type({
+  type: "'RTC'",
+  payload: "null",
+}).or({
+  type: "'CONNECT'",
+  payload: xToAddress,
+}).or({
+  type: "'ADDREMOTE'",
+  payload: xToAddress,
+});
+
+export const xPayloadSignaling = type({
+  type: "'STARTSERVER'",
+  payload: "number",
+});
 
 export const xPayload = type(
   xPayloadSys,
@@ -91,6 +117,10 @@ export const xPayload = type(
   xPayloadMain,
 ).or(
   xPayloadActor,
+).or(
+  xPayloadRTC,
+).or(
+  xPayloadSignaling,
 );
 
 export type xPayload = typeof xPayload.infer;
@@ -128,26 +158,4 @@ export function notAddressArray(
   address: Message["address"],
 ): address is nonArrayAddress {
   return !Array.isArray(address);
-}
-
-export class ActorWorker extends Worker {
-  constructor(scriptURL: string | URL, options?: WorkerOptions) {
-    super(scriptURL, options);
-  }
-
-  postMessage(message: Message, transfer: Transferable[]): void;
-  postMessage(message: Message, options?: StructuredSerializeOptions): void;
-  postMessage(
-    message: Message,
-    transferOrOptions?: Transferable[] | StructuredSerializeOptions,
-  ): void {
-    message.address = JSON.stringify(
-      message.address,
-    ) as unknown as MessageAddressReal;
-    if (Array.isArray(transferOrOptions)) {
-      super.postMessage(message, transferOrOptions);
-    } else {
-      super.postMessage(message, transferOrOptions);
-    }
-  }
 }

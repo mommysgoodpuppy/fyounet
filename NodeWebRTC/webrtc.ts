@@ -1,7 +1,7 @@
 import WebSocket from "ws";
 import wrtc from "@roamhq/wrtc";
 
-const SIGNALING_SERVER_URL = "ws://localhost:8080";
+const SIGNALING_SERVER_URL = "ws://localhost:8081";
 
 const peerConnections: Map<string, wrtc.RTCPeerConnection> = new Map();
 const dataChannels: Map<string, wrtc.RTCDataChannel> = new Map();
@@ -116,18 +116,21 @@ function createPeerConnection(targetPeerId: string) {
 function setupDataChannel(targetPeerId: string, channel: wrtc.RTCDataChannel) {
   channel.onopen = () => {
     console.log(`Data channel is open with peer ${targetPeerId}`);
-    sendMessage(targetPeerId, `Hello`);
+    sendMessage(targetPeerId, 'Hello');
   };
 
-  channel.onmessage = (event) => {
+  channel.onmessage = (event: MessageEvent) => {
+    const eventData = JSON.parse(event.data);
     console.log(
       `Received WebRTC message from ${targetPeerId}:`,
-      event.data,
+      eventData,
     );
-    if (event.data === "Hello") {
+    if (eventData == "Hello") {
+      console.log("its a Hello");
       return;
     }
     else {
+      console.log("its not a Hello its a");
       wsIPC.send(JSON.stringify({
         type: "webrtc_message_custom",
         rtcmessage: event.data,
@@ -161,7 +164,8 @@ async function createOffer(targetPeerId: string) {
 function sendMessage(targetPeerId: string, message: string) {
   const dataChannel = dataChannels.get(targetPeerId);
   if (dataChannel && dataChannel.readyState === "open") {
-    dataChannel.send(message);
+
+    dataChannel.send(JSON.stringify(message));
     console.log(`Sent WebRTC message to ${targetPeerId}:`, message);
   } else {
     console.log(

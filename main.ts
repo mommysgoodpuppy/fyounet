@@ -29,7 +29,7 @@ const worker = new ActorWorker(
   { type: "module" },
 );
 
-await wait(3000);
+await wait(5000);
 
 worker.postMessage({
   address: { fm: System, to: null },

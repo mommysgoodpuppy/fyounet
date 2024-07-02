@@ -1,10 +1,14 @@
 import {
   ActorFunctions,
   BaseState,
+  Message,
   Payload,
   worker,
 } from "../actorsystem/types.ts";
-import { OnMessage, Postman, trpc } from "./PostMan.ts";
+import { wait } from "../actorsystem/utils.ts";
+import { OnMessage, Postman, trpc } from "../classes/PostMan.ts";
+import { WebRTCServer } from "../classes/webrtcClass.ts";
+import { getAvailablePort } from "https://raw.githubusercontent.com/jakubdolejs/deno-port/main/mod.ts";
 
 type State = {
   id: string;
@@ -22,9 +26,12 @@ const state: State & BaseState = {
 };
 
 const functions: ActorFunctions = {
-  FILE: async (payload) => {
-    const text = await trpc.readFile.query(payload);
-    console.log("File contents:", text);
+  RTC: async (_payload) => {
+    const socket = await Postman.creatertcsocket();
+    socket.send(JSON.stringify({
+      type: "ADDREMOTE",
+      payload: state.id,
+    }));
   },
   LOG: (_payload) => {
     console.log(state.id);

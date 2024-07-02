@@ -3,7 +3,6 @@ import { type } from "arktype";
 import { Signal } from "../actorsystem/utils.ts";
 import {
   ActorFunctions,
-  ActorWorker,
   BaseState,
   Message,
   notAddressArray,
@@ -13,7 +12,11 @@ import {
   ToAddress,
   worker,
 } from "../actorsystem/types.ts";
+import { ActorWorker } from "../actorsystem/ActorWorker.ts";
+import { wait } from "../actorsystem/utils.ts";
+import { WebRTCServer } from "./webrtcClass.ts";
 import type { AppRouter } from "../actorsystem/router.ts";
+import { getAvailablePort } from "https://raw.githubusercontent.com/jakubdolejs/deno-port/main/mod.ts";
 
 export const trpc = createTRPCProxyClient<AppRouter>({
   links: [
@@ -46,9 +49,6 @@ export class Postman {
         payload: Postman.state.id,
       });
       console.log("initied sub actor with args:", payload);
-    },
-
-    ROUTERESPONSE: (payload) => {
     },
 
     //register self to system
@@ -107,6 +107,40 @@ export class Postman {
     const result = await Postman.creationSignal.wait();
 
     return result;
+  }
+
+  static async creatertcsocket() {
+    const port = await getAvailablePort();
+    if (!port) {
+      throw new Error("no port available");
+    }
+    const server = new WebRTCServer(Postman.state.id, port);
+    const socket = await server.start();
+    Postman.state.socket = socket;
+    socket.addEventListener("open", () => {
+      console.log("socket open");
+      socket.send(JSON.stringify({
+        type: "portalSet",
+        payload: Postman.state.id,
+      }));
+    });
+    socket.addEventListener("message", (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
+      console.log("got message raw", data);
+      const message = JSON.parse(data.rtcmessage) as Message;
+      console.log("got message", message);
+      if (message.address.to === Postman.state.id) {
+        console.log("message is to self");
+        Postman.runFunctions(message);
+      }
+      else {
+        throw new Error("message not to self");
+      }
+    });
+    while (socket.readyState !== WebSocket.OPEN) {
+      await wait(100);
+    }
+    return socket;
   }
 
   static addPortal(worker: Worker, actorAddr: string, portal: string) {

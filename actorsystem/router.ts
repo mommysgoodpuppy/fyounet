@@ -10,14 +10,8 @@ export const appRouter = t.router({
       console.log("Received message:", input);
       // Process message based on its type
       switch (input.type) {
-        case "FILE":
-          // Handle FILE type message
-          break;
         case "SHUT":
           // Handle OTHER_TYPE1 type message
-          break;
-        case "OTHER_TYPE2":
-          // Handle OTHER_TYPE2 type message
           break;
       }
       return input;

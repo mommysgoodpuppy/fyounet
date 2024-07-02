@@ -1,9 +1,10 @@
-import { OnMessage, Postman } from "./PostMan.ts";
+import { OnMessage, Postman } from "../classes/PostMan.ts";
 import { ActorFunctions, BaseState, worker } from "../actorsystem/types.ts";
 
 import { SignalingServer } from "../classes/signalingClass.ts";
 
 const state: BaseState = {
+  name: "signalingDenoServer",
   id: "",
   db: {},
   numbah: 0,
