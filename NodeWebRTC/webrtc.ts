@@ -176,18 +176,18 @@ function sendMessage(targetPeerId: string, message: string) {
   }
 }
 
-function queryDataPeers(cbaddr: string, targetPeerId: string) {
+function queryDataPeers(CallbackReturnAddress: string, targetPeerId: string) {
   const dataChannel = dataChannels.get(targetPeerId);
   if (dataChannel && dataChannel.readyState === "open") {
     wsIPC.send(JSON.stringify({
       type: "query_dataPeersReturn",
-      targetPeerId: cbaddr,
+      targetPeerId: CallbackReturnAddress,
       rtcmessage: true,
     }));
   } else {
     wsIPC.send(JSON.stringify({
       type: "query_dataPeersReturn",
-      targetPeerId: cbaddr,
+      targetPeerId: CallbackReturnAddress,
       rtcmessage: false,
     }));
     console.log(
