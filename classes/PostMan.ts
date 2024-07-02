@@ -87,8 +87,41 @@ export class Postman {
     } else throw new Error("not address array");
   }
 
-  static async PostMessage(worker: ActorWorker, message: Message) {
-    worker.postMessage(message);
+  static async PostMessage(
+    worker: ActorWorker,
+    message: Message,
+    tryrtc?: boolean,
+  ) {
+    if (tryrtc) {
+      if (
+        Postman.state.socket &&
+        Postman.state.socket !== null &&
+        Postman.state.socket.readyState === WebSocket.OPEN
+      ) {
+        //check portal
+
+        Postman.callbackSignal = new Signal<boolean>();
+        Postman.state.socket.send(JSON.stringify({
+          type: "query_dataPeers",
+          from: Postman.state.id,
+          targetPeerId: message.address.to,
+        }));
+        const result: boolean = await Postman.callbackSignal.wait();
+        if (result) {
+          Postman.state.socket.send(JSON.stringify({
+            type: "send_message",
+            targetPeerId: message.address.to,
+            payload: message,
+          }));
+        }
+        else {
+          console.error("trough rtc failed, trying locally");
+          worker.postMessage(message);
+        }
+      }
+    } else {
+      worker.postMessage(message);
+    }
   }
 
   static async create(
@@ -127,14 +160,19 @@ export class Postman {
     socket.addEventListener("message", (event: MessageEvent) => {
       const data = JSON.parse(event.data);
       console.log("got message raw", data);
-      const message = JSON.parse(data.rtcmessage) as Message;
-      console.log("got message", message);
-      if (message.address.to === Postman.state.id) {
-        console.log("message is to self");
-        Postman.runFunctions(message);
-      }
-      else {
-        throw new Error("message not to self");
+      if (data.type === "webrtc_message_custom") {
+        const message = JSON.parse(data.rtcmessage) as Message;
+        console.log("got message", message);
+        if (message.address.to === Postman.state.id) {
+          console.log("message is to self");
+          Postman.runFunctions(message);
+        } else {
+          throw new Error("message not to self");
+        }
+      } else if (data.type === "query_dataPeers") {
+        const message = JSON.parse(data.rtcmessage);
+        Postman.callbackSignal.trigger(message);
+        console.log("got message", message);
       }
     });
     while (socket.readyState !== WebSocket.OPEN) {

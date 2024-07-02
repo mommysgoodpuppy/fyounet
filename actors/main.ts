@@ -1,8 +1,8 @@
 import {
   ActorFunctions,
   BaseState,
-  Payload,
   Message,
+  Payload,
   System,
   worker,
 } from "../actorsystem/types.ts";
@@ -21,6 +21,7 @@ type State = {
 const state: State & BaseState = {
   name: "main",
   id: "",
+  socket: null,
   db: {},
   numbah: 0,
   addressbook: [],
@@ -69,23 +70,13 @@ async function main(_payload: Payload["MAIN"]) {
     type: "create_offer",
     targetPeerId: remoteid,
   }));
-  await wait(3000);
-  const payload: Message = {
+  await wait(6000);
+
+  Postman.PostMessage(worker, {
     address: { fm: state.id, to: remoteid },
     type: "LOG",
     payload: null,
-  };
-
-  socket.send(JSON.stringify({
-    type: "send_message",
-    targetPeerId: remoteid,
-    payload: payload,
-  }));
-
-
-  await wait(6000);
-
-  await wait(3000);
+  }, true);
 }
 
 new Postman(worker, functions, state);

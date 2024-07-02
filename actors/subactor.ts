@@ -20,6 +20,7 @@ const state: State & BaseState = {
   id: "",
   db: {},
   name: "sub",
+  socket: null,
   numbah: 0,
   addressbook: [],
   rtcSocket: null,

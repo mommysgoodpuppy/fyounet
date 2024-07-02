@@ -44,6 +44,10 @@ function handleIPCMessage(data: any) {
     case "send_message":
       sendMessage(data.targetPeerId, data.payload);
       break;
+    case "query_dataPeers":
+
+      queryDataPeers(data.from, data.targetPeerId);
+      break;
     default:
       console.log("Unknown IPC message type:", data.type);
       console.log("Unknown IPC message type:", data);
@@ -62,7 +66,6 @@ async function handleSignalingMessage(data: any) {
     const peerConnection = peerConnections.get(from)!;
 
     if (to === peerId) {
-
       if (type === "offer") {
         await peerConnection.setRemoteDescription(
           new wrtc.RTCSessionDescription(data),
@@ -104,7 +107,7 @@ function createPeerConnection(targetPeerId: string) {
     }
   };
 
-  peerConnection.ondatachannel = (event) => {
+  peerConnection.ondatachannel = (event: wrtc.RTCDataChannelEvent) => {
     console.log("Data channel", event.channel);
     setupDataChannel(targetPeerId, event.channel);
   };
@@ -116,7 +119,7 @@ function createPeerConnection(targetPeerId: string) {
 function setupDataChannel(targetPeerId: string, channel: wrtc.RTCDataChannel) {
   channel.onopen = () => {
     console.log(`Data channel is open with peer ${targetPeerId}`);
-    sendMessage(targetPeerId, 'Hello');
+    sendMessage(targetPeerId, "Hello");
   };
 
   channel.onmessage = (event: MessageEvent) => {
@@ -128,8 +131,7 @@ function setupDataChannel(targetPeerId: string, channel: wrtc.RTCDataChannel) {
     if (eventData == "Hello") {
       console.log("its a Hello");
       return;
-    }
-    else {
+    } else {
       console.log("its not a Hello its a");
       wsIPC.send(JSON.stringify({
         type: "webrtc_message_custom",
@@ -164,13 +166,32 @@ async function createOffer(targetPeerId: string) {
 function sendMessage(targetPeerId: string, message: string) {
   const dataChannel = dataChannels.get(targetPeerId);
   if (dataChannel && dataChannel.readyState === "open") {
-
     dataChannel.send(JSON.stringify(message));
     console.log(`Sent WebRTC message to ${targetPeerId}:`, message);
   } else {
     console.log(
       `Data channel not open with ${targetPeerId}. Cannot send message.`,
       message,
+    );
+  }
+}
+
+function queryDataPeers(cbaddr: string, targetPeerId: string) {
+  const dataChannel = dataChannels.get(targetPeerId);
+  if (dataChannel && dataChannel.readyState === "open") {
+    wsIPC.send(JSON.stringify({
+      type: "query_dataPeersReturn",
+      targetPeerId: cbaddr,
+      rtcmessage: true,
+    }));
+  } else {
+    wsIPC.send(JSON.stringify({
+      type: "query_dataPeersReturn",
+      targetPeerId: cbaddr,
+      rtcmessage: false,
+    }));
+    console.log(
+      `Dataxxx channel not open with ${targetPeerId}. Cannot send message.`,
     );
   }
 }

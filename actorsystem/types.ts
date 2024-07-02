@@ -9,6 +9,7 @@ export type ToAddress = typeof xToAddress.infer;
 export type BaseState = {
   name: string;
   id: string;
+  socket: WebSocket | null
   [key: string]: unknown;
 };
 

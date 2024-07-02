@@ -72,6 +72,8 @@ export class WebRTCServer {
       });
 
       socket.addEventListener("message", (event) => {
+        console.log("msg from ipc", event.data);
+
         const data = JSON.parse(event.data);
 
         console.log("msg from ipc", event.data);
@@ -81,6 +83,18 @@ export class WebRTCServer {
           }
         } else if (data.type === "portalSet") {
           this.ipcSockets.set(data.payload, socket);
+        }else if (data.type === "query_dataPeersReturn") {
+          console.log("query_dataPeersReturn");
+          if (data.rtcmessage) {
+            try {
+              this.ipcSockets.get(data.targetPeerId)?.send(JSON.stringify({
+                type: "query_dataPeers",
+                rtcmessage: data.rtcmessage,
+              }));
+            } catch (e) {
+              console.log("error sending query_dataPeers", e);
+            }
+          }
         } else if (data.type === "webrtc_message_custom") {
           console.log("received custom webrtc message");
           console.log("xx",this.ipcSockets);
