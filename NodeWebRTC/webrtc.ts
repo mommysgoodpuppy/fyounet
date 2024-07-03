@@ -128,10 +128,8 @@ function setupDataChannel(targetPeerId: string, channel: wrtc.RTCDataChannel) {
       eventData,
     );
     if (eventData == "Hello") {
-      console.log("its a Hello");
       return;
     } else {
-      console.log("its not a Hello its a");
       wsIPC.send(JSON.stringify({
         type: "webrtc_message_custom",
         rtcmessage: event.data,
