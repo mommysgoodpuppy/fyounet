@@ -1,16 +1,33 @@
+import { getIP } from "https://deno.land/x/get_ip/mod.ts";
+
 export class WebRTCServer {
   private nodeSocket: WebSocket | null = null;
 
   private ipcPort: number;
+  private ddnsIp: string;
   private id: string;
   private ipcSockets: Map<string, WebSocket> = new Map();
 
   constructor(id: string, ipcPort: number) {
     this.ipcPort = ipcPort;
+    this.ddnsIp = "";
     this.id = id;
   }
 
+  private async getddnsIP(): Promise<string> {
+    const publicIp = await getIP();
+    const resolved = await Deno.resolveDns("petplay.ddns.net", "A", {
+      nameServer: { ipAddr: "8.8.8.8", port: 53 },
+    });
+    if (publicIp == resolved) {
+      return "ws://192.168.1.178:8081";
+    } else {
+      return "ws://petplay.ddns.net:8081";
+    }
+  }
+
   async start() {
+    this.ddnsIp = await this.getddnsIP();
     await this.startNodeProcesses();
     this.startIPCServer();
     const sock = await this.createWebSocket(this.ipcPort);
@@ -28,7 +45,7 @@ export class WebRTCServer {
     const command = new Deno.Command("node", {
       args: [
         "-e",
-        `require('child_process').execSync('npx ts-node nodeWebRTC/webrtc.ts ${id} ${this.ipcPort}', {stdio: 'inherit'})`,
+        `require('child_process').execSync('npx ts-node nodeWebRTC/webrtc.ts ${id} ${this.ipcPort} ${this.ddnsIp}', {stdio: 'inherit'})`,
       ],
       stdin: "piped",
       stdout: "piped",
@@ -82,7 +99,7 @@ export class WebRTCServer {
           }
         } else if (data.type === "portalSet") {
           this.ipcSockets.set(data.payload, socket);
-        }else if (data.type === "query_dataPeersReturn") {
+        } else if (data.type === "query_dataPeersReturn") {
           if (data.rtcmessage) {
             try {
               this.ipcSockets.get(data.targetPeerId)?.send(JSON.stringify({
@@ -99,14 +116,12 @@ export class WebRTCServer {
           console.log("xx",data); */
           const rtcmessage = JSON.parse(data.rtcmessage);
           const { address: { to } } = rtcmessage;
-          console.log("to",to); 
+          console.log("to", to);
 
           if (this.ipcSockets.has(to)) {
             console.log("sending webrtc message to ipc socket");
             this.ipcSockets.get(to)?.send(JSON.stringify(data));
           }
-
-          
         } else {
           this.nodeSocket?.send(JSON.stringify(data));
         }

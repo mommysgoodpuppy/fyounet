@@ -1,14 +1,14 @@
 import WebSocket from "ws";
 import wrtc from "@roamhq/wrtc";
 
-const SIGNALING_SERVER_URL = "ws://localhost:8081";
-
 const peerConnections: Map<string, wrtc.RTCPeerConnection> = new Map();
 const dataChannels: Map<string, wrtc.RTCDataChannel> = new Map();
 
 const peerId = process.argv[2];
 console.log(peerId);
 const ipcPort = process.argv[3];
+const ddnsIp = process.argv[4];
+const SIGNALING_SERVER_URL = ddnsIp;
 console.log(ipcPort);
 const DENO_SERVER_URL = `ws://localhost:${ipcPort}`;
 

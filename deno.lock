@@ -452,6 +452,9 @@
       }
     }
   },
+  "redirects": {
+    "https://deno.land/x/get_ip/mod.ts": "https://deno.land/x/get_ip@v2.0.0/mod.ts"
+  },
   "remote": {
     "https://deno.land/std@0.125.0/async/deadline.ts": "edbdf6cd7a5e3337c4c24c9b616491f8f1d61d36fc415d5d5b4af33557de0d23",
     "https://deno.land/std@0.125.0/async/debounce.ts": "3cf9306b4e9038ee3238111e338f412ecf3541b1a97ba9fc1f960be8af5a5f39",
@@ -461,6 +464,7 @@
     "https://deno.land/std@0.125.0/async/mux_async_iterator.ts": "35561f258d32c77170f9d1faf3d650890fb6502d5fe12f505c050b4ea1aee899",
     "https://deno.land/std@0.125.0/async/pool.ts": "97b0dd27c69544e374df857a40902e74e39532f226005543eabacb551e277082",
     "https://deno.land/std@0.125.0/async/tee.ts": "518c7bfd5184c8cd92b47115026a6a2243e81d83e2c3e71c2aa5cdb5988998b1",
+    "https://deno.land/x/get_ip@v2.0.0/mod.ts": "8a967dece886ddf7f7bf6c8d6000c98a4ff374834a90a4e0fde868ce4301873d",
     "https://esm.sh/@trpc/client@10.38.0": "99098f4485bef76ae5e421db7f8fc8a4f2eabd1f91530116c72bd58fb0ab63ca",
     "https://esm.sh/@trpc/server@10.38.0": "0c4203ad9499eb3543940f143e905f72a86d1a90f217ac2440147433e739ba95",
     "https://esm.sh/@trpc/server@10.38.0/adapters/fetch": "eb0bd9516004b42eff8a3d119acc4dbcc444682bf269a95056dfe18ca099282e",
