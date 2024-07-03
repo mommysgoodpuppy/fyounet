@@ -34,6 +34,9 @@ const functions: ActorFunctions = {
   LOG: (_payload) => {
     console.log(state.id);
   },
+  STDIN: (payload) => {
+    console.log("stdin:", payload);
+  },
 };
 
 async function main(_payload: Payload["MAIN"]) {
@@ -67,7 +70,7 @@ async function main(_payload: Payload["MAIN"]) {
 
   // connect to subactor
   Postman.functions?.CONNECT?.(remoteid);
-  await wait(7000);
+  await wait(10000);
 
   // tell subactor to log
   Postman.PostMessage(worker, {

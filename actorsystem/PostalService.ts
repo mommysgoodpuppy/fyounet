@@ -146,7 +146,7 @@ export class PostalService {
       const worker: ActorWorker = PostalService.actors.get(address.to)!;
 
       worker.postMessage({
-        address: { fm: System, to: null },
+        address: { fm: System, to: address.to },
         type: rMessage.type,
         payload: rMessage.payload,
       } as Message);

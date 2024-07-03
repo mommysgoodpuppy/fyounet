@@ -7,6 +7,7 @@ const state: BaseState = {
   name: "signalingDenoServer",
   id: "",
   db: {},
+  socket: null,
   numbah: 0,
   addressbook: [],
   rtcSocket: null,

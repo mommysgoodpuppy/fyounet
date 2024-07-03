@@ -9,7 +9,7 @@ export type ToAddress = typeof xToAddress.infer;
 export type BaseState = {
   name: string;
   id: string;
-  socket: WebSocket | null
+  socket: WebSocket | null;
   [key: string]: unknown;
 };
 
@@ -78,6 +78,9 @@ export const xPayloadSys = type({
 }).or({
   type: "'DELETE'",
   payload: xToAddress,
+}).or({
+  type: "'STDIN'",
+  payload: "string",
 });
 
 export const xPayloadMain = type({

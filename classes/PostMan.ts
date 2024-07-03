@@ -87,7 +87,7 @@ export class Postman {
   static runFunctions(message: Message) {
     if (notAddressArray(message.address)) {
       const address = message.address;
-
+      console.log(address);
       console.log(
         `[${address.to}]Actor running function, type: ${message.type}, payload: ${message.payload}`,
       );
