@@ -23,17 +23,9 @@ const state: State & BaseState = {
   socket: null,
   numbah: 0,
   addressbook: [],
-  rtcSocket: null,
 };
 
 const functions: ActorFunctions = {
-  RTC: async (_payload) => {
-    const socket = await Postman.creatertcsocket();
-    socket.send(JSON.stringify({
-      type: "ADDREMOTE",
-      payload: state.id,
-    }));
-  },
   LOG: (_payload) => {
     console.log(state.id);
   },

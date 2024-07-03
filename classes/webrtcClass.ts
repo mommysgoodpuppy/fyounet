@@ -49,8 +49,9 @@ export class WebRTCServer {
         const decodedValue = decoder.decode(value);
         const lines = decodedValue.split("\n");
         const nonEmptyLines = lines.filter((line) => line.trim() !== "");
+        const idPartBeforeAt = id.split("@")[0];
         const prefixedLines = nonEmptyLines.map((line) =>
-          `[RTC NODE: ${id}]: ${line}`
+          `[RTC NODE: ${idPartBeforeAt}]: ${line}`
         );
         const formattedOutput = prefixedLines.join("\n");
         console.log(formattedOutput);
@@ -72,11 +73,9 @@ export class WebRTCServer {
       });
 
       socket.addEventListener("message", (event) => {
-        console.log("msg from ipc", event.data);
-
         const data = JSON.parse(event.data);
 
-        console.log("msg from ipc", event.data);
+        console.log("msg from ipc", data);
         if (data.peerIdSet) {
           if (data.peerIdSet === this.id) {
             this.nodeSocket = socket;

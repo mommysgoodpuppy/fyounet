@@ -148,7 +148,7 @@ export type hFunction = (_payload: Payload[MessageType]) => void;
 
 export type PayloadHandler<T extends MessageType> = (
   payload: Payload[T],
-  address: PairAddress,
+  address?: PairAddress,
 ) => hFunction | void | Promise<void>;
 
 export type ActorFunctions = { [K in MessageType]?: PayloadHandler<K> };

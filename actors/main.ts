@@ -21,11 +21,10 @@ type State = {
 const state: State & BaseState = {
   name: "main",
   id: "",
-  socket: null,
   db: {},
+  socket: null,
   numbah: 0,
   addressbook: [],
-  rtcSocket: null,
 };
 
 const functions: ActorFunctions = {
@@ -55,10 +54,10 @@ async function main(_payload: Payload["MAIN"]) {
 
   const remoteid = await Postman.create(worker, "subactor.ts", state);
 
-  const socket = await Postman.creatertcsocket();
+  // create rtc socket on self
+  Postman.functions?.RTC?.(null);
 
-  // tell subactor to make a socket and listen
-
+  // tell subactor to create rtc socket
   Postman.PostMessage(worker, {
     address: { fm: state.id, to: remoteid },
     type: "RTC",
@@ -66,12 +65,11 @@ async function main(_payload: Payload["MAIN"]) {
   });
   await wait(3000);
 
-  socket.send(JSON.stringify({
-    type: "create_offer",
-    targetPeerId: remoteid,
-  }));
-  await wait(6000);
+  // connect to subactor
+  Postman.functions?.CONNECT?.(remoteid);
+  await wait(7000);
 
+  // tell subactor to log
   Postman.PostMessage(worker, {
     address: { fm: state.id, to: remoteid },
     type: "LOG",

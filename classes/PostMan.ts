@@ -39,10 +39,10 @@ export class Postman {
   static callbackSignal: Signal<any>;
   static portals: Array<ToAddress>;
 
-  static functions: ActorFunctions = {
+  public static functions: ActorFunctions = {
     //initialize actor
     INIT: (payload) => {
-      Postman.state.id = `${Postman.state.name}${crypto.randomUUID()}`;
+      Postman.state.id = `${Postman.state.name}@${crypto.randomUUID()}`;
       Postman.PostMessage(worker, {
         address: { fm: Postman.state.id, to: System },
         type: "LOADED",
@@ -60,6 +60,18 @@ export class Postman {
     SHUT: (_payload) => {
       console.log("Shutting down...");
       worker.terminate();
+    },
+
+    RTC: async (_payload) => {
+      console.log("creating rtc socket");
+      const socket = await Postman.creatertcsocket();
+    },
+
+    CONNECT: async (payload) => {
+      Postman.state.socket?.send(JSON.stringify({
+        type: "create_offer",
+        targetPeerId: payload,
+      }));
     },
   };
 
@@ -113,8 +125,7 @@ export class Postman {
             targetPeerId: message.address.to,
             payload: message,
           }));
-        }
-        else {
+        } else {
           console.error("trough rtc failed, trying locally");
           worker.postMessage(message);
         }
@@ -142,6 +153,9 @@ export class Postman {
     return result;
   }
 
+  /**
+   * Sets state.socket to a new rtc socket
+   */
   static async creatertcsocket() {
     const port = await getAvailablePort();
     if (!port) {
@@ -164,7 +178,6 @@ export class Postman {
         const message = JSON.parse(data.rtcmessage) as Message;
         console.log("got message", message);
         if (message.address.to === Postman.state.id) {
-          console.log("message is to self");
           Postman.runFunctions(message);
         } else {
           throw new Error("message not to self");
@@ -178,7 +191,7 @@ export class Postman {
     while (socket.readyState !== WebSocket.OPEN) {
       await wait(100);
     }
-    return socket;
+    return true;
   }
 
   static addPortal(worker: Worker, actorAddr: string, portal: string) {
