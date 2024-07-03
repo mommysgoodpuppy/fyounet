@@ -108,7 +108,6 @@ function createPeerConnection(targetPeerId: string) {
   };
 
   peerConnection.ondatachannel = (event: wrtc.RTCDataChannelEvent) => {
-    console.log("Data channel", event.channel);
     setupDataChannel(targetPeerId, event.channel);
   };
   console.log("Created peer connection");

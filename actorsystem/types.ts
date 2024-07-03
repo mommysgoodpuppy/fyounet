@@ -97,6 +97,9 @@ export const xPayloadActor = type({
 }).or({
   type: "'REGISTER'",
   payload: xToAddress,
+}).or({
+  type: "'CUSTOMINIT'",
+  payload: "null",
 });
 
 export const xPayloadRTC = type({

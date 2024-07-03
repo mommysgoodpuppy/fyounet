@@ -10,7 +10,7 @@ import { OnMessage, Postman, trpc } from "../classes/PostMan.ts";
 import { wait } from "../actorsystem/utils.ts";
 import { WebRTCServer } from "../classes/webrtcClass.ts";
 import { PostalService } from "../actorsystem/PostalService.ts";
-import { getAvailablePort } from "https://raw.githubusercontent.com/jakubdolejs/deno-port/main/mod.ts";
+
 
 type State = {
   id: string;
@@ -41,19 +41,6 @@ const functions: ActorFunctions = {
 
 async function main(_payload: Payload["MAIN"]) {
   console.log("main!");
-
-  //#region signaling
-  const signalingServer = await Postman.create(
-    worker,
-    "signalingDenoServer.ts",
-    state,
-  );
-  Postman.PostMessage(worker, {
-    address: { fm: state.id, to: signalingServer },
-    type: "STARTSERVER",
-    payload: 8081,
-  });
-  //#endregion
 
   const remoteid = await Postman.create(worker, "subactor.ts", state);
 

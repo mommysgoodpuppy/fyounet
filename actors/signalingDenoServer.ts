@@ -1,6 +1,5 @@
 import { OnMessage, Postman } from "../classes/PostMan.ts";
 import { ActorFunctions, BaseState, worker } from "../actorsystem/types.ts";
-
 import { SignalingServer } from "../classes/signalingClass.ts";
 
 const state: BaseState = {
@@ -14,11 +13,9 @@ const state: BaseState = {
 };
 
 const functions: ActorFunctions = {
-  /* dbAdd: (payload) => {
-    db[payload.key] = payload.value;
-    console.log("added to db", db);
-  }, */
-
+  CUSTOMINIT: (_payload) => {
+    Postman.functions?.STARTSERVER?.(8081);
+  },
   STARTSERVER: (payload) => {
     const signalingServer = new SignalingServer(payload);
     signalingServer.start();

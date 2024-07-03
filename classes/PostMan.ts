@@ -16,7 +16,7 @@ import { ActorWorker } from "../actorsystem/ActorWorker.ts";
 import { wait } from "../actorsystem/utils.ts";
 import { WebRTCServer } from "./webrtcClass.ts";
 import type { AppRouter } from "../actorsystem/router.ts";
-import { getAvailablePort } from "https://raw.githubusercontent.com/jakubdolejs/deno-port/main/mod.ts";
+import { getAvailablePort } from "jsr:@std/net";
 
 export const trpc = createTRPCProxyClient<AppRouter>({
   links: [
@@ -48,6 +48,7 @@ export class Postman {
         type: "LOADED",
         payload: Postman.state.id,
       });
+      Postman.functions.CUSTOMINIT?.(null);
       console.log("initied sub actor with args:", payload);
     },
 
@@ -87,7 +88,6 @@ export class Postman {
   static runFunctions(message: Message) {
     if (notAddressArray(message.address)) {
       const address = message.address;
-      console.log(address);
       console.log(
         `[${address.to}]Actor running function, type: ${message.type}, payload: ${message.payload}`,
       );
@@ -157,7 +157,7 @@ export class Postman {
    * Sets state.socket to a new rtc socket
    */
   static async creatertcsocket() {
-    const port = await getAvailablePort();
+    const port = getAvailablePort();
     if (!port) {
       throw new Error("no port available");
     }
@@ -176,7 +176,7 @@ export class Postman {
       console.log("got message raw", data);
       if (data.type === "webrtc_message_custom") {
         const message = JSON.parse(data.rtcmessage) as Message;
-        console.log("got message", message);
+        console.log("got custom message", message);
         if (message.address.to === Postman.state.id) {
           Postman.runFunctions(message);
         } else {

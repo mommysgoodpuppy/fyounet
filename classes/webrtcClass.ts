@@ -83,7 +83,6 @@ export class WebRTCServer {
         } else if (data.type === "portalSet") {
           this.ipcSockets.set(data.payload, socket);
         }else if (data.type === "query_dataPeersReturn") {
-          console.log("query_dataPeersReturn");
           if (data.rtcmessage) {
             try {
               this.ipcSockets.get(data.targetPeerId)?.send(JSON.stringify({
@@ -96,8 +95,8 @@ export class WebRTCServer {
           }
         } else if (data.type === "webrtc_message_custom") {
           console.log("received custom webrtc message");
-          console.log("xx",this.ipcSockets);
-          console.log("xx",data);
+          /* console.log("xx",this.ipcSockets);
+          console.log("xx",data); */
           const rtcmessage = JSON.parse(data.rtcmessage);
           const { address: { to } } = rtcmessage;
           console.log("to",to); 

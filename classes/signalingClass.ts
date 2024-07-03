@@ -5,7 +5,7 @@ export class SignalingServer {
 
   constructor(private port: number) {}
 
-  async start() {
+  start() {
     this.startSignalingServer();
   }
   // SERVER

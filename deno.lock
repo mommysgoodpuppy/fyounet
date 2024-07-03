@@ -2,6 +2,7 @@
   "version": "3",
   "packages": {
     "specifiers": {
+      "jsr:@std/net": "jsr:@std/net@0.224.4",
       "npm:@roamhq/wrtc": "npm:@roamhq/wrtc@0.8.0",
       "npm:@trpc/server": "npm:@trpc/server@10.45.2",
       "npm:arktype": "npm:arktype@2.0.0-dev.26",
@@ -9,6 +10,11 @@
       "npm:ws": "npm:ws@8.17.0",
       "npm:zod": "npm:zod@3.23.8",
       "npm:zod-to-ts": "npm:zod-to-ts@1.2.0_typescript@5.4.5_zod@3.23.8"
+    },
+    "jsr": {
+      "@std/net@0.224.4": {
+        "integrity": "4be5b6fb9cab0380b68d9929503bcbac35f22eb5d179ec1e2f331646c0066fe8"
+      }
     },
     "npm": {
       "@arktype/schema@0.1.18": {
