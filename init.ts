@@ -5,7 +5,7 @@ import "./actors/signalingDenoServer.ts";
 
 const postalservice = new PostalService();
 
-const mainAddress = await postalservice.add("main.ts");
+const mainAddress = await postalservice.add("mainTest.ts");
 
 postalservice.Post({
   address: { fm: "system", to: mainAddress },
@@ -25,7 +25,8 @@ async function asyncPrompt(): Promise<string> {
 
 if (import.meta.main) {
   while (true) {
-    const msg = await asyncPrompt() ?? "";
+    const msgD = await asyncPrompt() ?? "";
+    const msg = msgD.replace(/\r/g, '');
     postalservice.Post({
       address: { fm: "system", to: mainAddress },
       type: "STDIN",

@@ -26,10 +26,16 @@ const state: State & BaseState = {
 };
 
 const functions: ActorFunctions = {
+  CUSTOMINIT: (_payload) => {
+    rtc()
+  },
   LOG: (_payload) => {
     console.log(state.id);
   },
 };
+function rtc() {
+  Postman.functions?.RTC?.(null);
+}
 
 new Postman(worker, functions, state);
 

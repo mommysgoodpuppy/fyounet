@@ -3,15 +3,14 @@ import {
   BaseState,
   Message,
   Payload,
+  PayloadHandler,
   System,
   worker,
-  PayloadHandler,
 } from "../actorsystem/types.ts";
 import { OnMessage, Postman, trpc } from "../classes/PostMan.ts";
 import { wait } from "../actorsystem/utils.ts";
 import { WebRTCServer } from "../classes/webrtcClass.ts";
 import { PostalService } from "../actorsystem/PostalService.ts";
-
 
 type State = {
   id: string;
@@ -37,14 +36,26 @@ const functions: ActorFunctions = {
   },
   STDIN: (payload) => {
     console.log("stdin:", payload);
-    const vmessage = payload.split(":");
-    const type = vmessage[0] as keyof ActorFunctions;
-    const payload2 = vmessage[1];
+    if (payload.startsWith("/")) {
+      const vmessage = payload.split(":");
+      const address = vmessage[0].slice(1);
+      const type = vmessage[1] as any;
+      const payload2 = vmessage[2];
 
+      Postman.PostMessage(worker, {
+        address: { fm: state.id, to: address },
+        type: type,
+        payload: payload2,
+      }, true);
+    } else {
+      const vmessage = payload.split(":");
+      const type = vmessage[0] as keyof ActorFunctions;
+      const payload2 = vmessage[1];
 
-    (Postman.functions?.[type] as PayloadHandler<typeof type>)?.(
-      payload2
-    );
+      (Postman.functions?.[type] as PayloadHandler<typeof type>)?.(
+        payload2,
+      );
+    }
   },
 };
 

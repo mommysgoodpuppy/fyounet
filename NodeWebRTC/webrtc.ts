@@ -45,7 +45,6 @@ function handleIPCMessage(data: any) {
       sendMessage(data.targetPeerId, data.payload);
       break;
     case "query_dataPeers":
-
       queryDataPeers(data.from, data.targetPeerId);
       break;
     default:
@@ -87,6 +86,8 @@ async function handleSignalingMessage(data: any) {
           new wrtc.RTCIceCandidate(data.candidate),
         );
       }
+    } else {
+      console.error(to + "!=" + peerId);
     }
   } catch (error) {
     console.error("Error handling signaling message:", error);
