@@ -11,6 +11,7 @@ import { wait } from "../actorsystem/utils.ts";
 type State = {
   id: string;
   db: Record<string, unknown>;
+  portal: string;
   [key: string]: unknown;
 };
 
@@ -18,6 +19,7 @@ const state: State & BaseState = {
   name: "main",
   id: "",
   db: {},
+  portal: "",
   socket: null,
   numbah: 0,
   addressbook: [],
@@ -25,7 +27,6 @@ const state: State & BaseState = {
 
 const functions: ActorFunctions = {
   CUSTOMINIT: (_payload) => {
-
   },
   MAIN: (payload) => {
     main(payload);
@@ -52,10 +53,23 @@ const functions: ActorFunctions = {
       const type = vmessage[0] as keyof ActorFunctions;
       const payload2 = vmessage[1];
 
-      (Postman.functions?.[type] as PayloadHandler<typeof type>)?.(
-        payload2, state.id
-      );
+      if (!(Postman.functions?.[type] as PayloadHandler<typeof type>)) {
+        console.error(`No handler found for type ${type}`);
+      } else {
+        (Postman.functions[type] as PayloadHandler<typeof type>)(
+          payload2,
+          state.id,
+        );
+      }
     }
+  },
+  LOOKUP: async (payload) => {
+    const result = await Postman.PostMessage(worker, {
+      address: { fm: state.id, to: state.portal },
+      type: "LOOKUP",
+      payload: payload,
+    }, true);
+    console.log("result", result);
   },
 };
 
@@ -66,6 +80,7 @@ async function main(_payload: Payload["MAIN"]) {
   Postman.functions?.RTC?.(null, state.id);
 
   const portal = await Postman.create(worker, "portal.ts", state);
+  state.portal = portal;
   const portal2 = await Postman.create(worker, "portal.ts", state);
   const remoteid = await Postman.create(worker, "subactor.ts", state);
 
@@ -78,7 +93,7 @@ async function main(_payload: Payload["MAIN"]) {
       name: "self:Ellie",
       address: state.id,
     },
-  }, false);
+  });
 
   await wait(1000);
 
@@ -89,19 +104,16 @@ async function main(_payload: Payload["MAIN"]) {
       name: "self:Teaqu",
       address: remoteid,
     },
-  }, false);
+  });
 
-  const result3 = await Postman.PostMessage(worker, {
+  const all = await Postman.PostMessage(worker, {
     address: { fm: state.id, to: portal },
-    type: "LOOKUP",
-    payload: "Ellie",
+    type: "GET_ALL",
+    payload: null,
   }, true);
-
-  console.log("result3", result3);
-
+  console.log("all", all);
 
   await wait(10000);
-
 }
 
 new Postman(worker, functions, state);

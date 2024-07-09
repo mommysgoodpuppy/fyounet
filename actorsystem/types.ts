@@ -132,6 +132,9 @@ export const xPayloadPortal = type({
 }).or({
   type: "'CB:LOOKUP'|'LOOKUP'",
   payload: xToAddress,
+}).or({
+  type: "'CB:GET_ALL'|'GET_ALL'",
+  payload: "null|Array",
 });
 
 export const xPayload = type(
