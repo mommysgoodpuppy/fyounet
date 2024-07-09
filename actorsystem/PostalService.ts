@@ -1,10 +1,9 @@
-import { ActorFunctions, MessageAddress, MessageAddressReal } from "./types.ts";
+import { ActorFunctions, MessageAddressReal } from "./types.ts";
 import { Signal } from "./utils.ts";
 import {
   Message,
   nonArrayAddress,
   notAddressArray,
-  PairAddress,
   Payload,
   PayloadHandler,
   System,
@@ -32,7 +31,6 @@ export class PostalService {
       const message: Message = event.data;
       this.handleMessage(worker, message);
     };
-
     //send init message
     worker.postMessage({
       address: { fm: System, to: null },
@@ -61,6 +59,14 @@ export class PostalService {
       : [message.address];
 
     addresses.forEach((_address) => {
+
+
+      // if message type starts with CB
+      if (message.type.startsWith("CB")) {
+        //console.log("CB message", message);
+        message.type = "CB";
+      }
+
       const address: nonArrayAddress = message.address as nonArrayAddress;
       console.log("postalService handleMessage", message);
       // redirect message
@@ -74,6 +80,7 @@ export class PostalService {
           // message address is to another actor
           if (!PostalService.actors.has(address.to)) {
             console.error("No actor found");
+            console.log(PostalService.actors)
             // using portal instead
           }
           const targetWorker = PostalService.actors.get(address.to)!;
@@ -119,7 +126,7 @@ export class PostalService {
       },
     };
 
-    const address = message.address as nonArrayAddress;
+    const address = message.address as MessageAddressReal;
     (functions[message.type] as PayloadHandler<typeof message.type>)?.(
       message.payload as Payload[typeof message.type],
       address,

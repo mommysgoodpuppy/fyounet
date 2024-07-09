@@ -81,6 +81,9 @@ export const xPayloadSys = type({
 }).or({
   type: "'STDIN'",
   payload: "string",
+}).or({
+  type: "'CB'",
+  payload: "unknown",
 });
 
 export const xPayloadMain = type({
@@ -93,13 +96,16 @@ export const xPayloadActor = type({
   payload: "null",
 }).or({
   type: "'INIT'",
-  payload: "null",
+  payload: "null|string",
 }).or({
   type: "'REGISTER'",
   payload: xToAddress,
 }).or({
   type: "'CUSTOMINIT'",
   payload: "null",
+}).or({
+  type: "'CB:GETID'|'GETID'",
+  payload: "null|string",
 });
 
 export const xPayloadRTC = type({
@@ -118,6 +124,16 @@ export const xPayloadSignaling = type({
   payload: "number",
 });
 
+export const xString = type("string");
+
+export const xPayloadPortal = type({
+  type: "'PREGISTER'",
+  payload: { name: xString, address: xToAddress },
+}).or({
+  type: "'CB:LOOKUP'|'LOOKUP'",
+  payload: xToAddress,
+});
+
 export const xPayload = type(
   xPayloadSys,
 ).or(
@@ -128,6 +144,8 @@ export const xPayload = type(
   xPayloadRTC,
 ).or(
   xPayloadSignaling,
+).or(
+  xPayloadPortal,
 );
 
 export type xPayload = typeof xPayload.infer;
@@ -154,7 +172,7 @@ export type hFunction = (_payload: Payload[MessageType]) => void;
 
 export type PayloadHandler<T extends MessageType> = (
   payload: Payload[T],
-  address?: PairAddress,
+  address: MessageAddressReal | ToAddress,
 ) => hFunction | void | Promise<void>;
 
 export type ActorFunctions = { [K in MessageType]?: PayloadHandler<K> };

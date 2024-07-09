@@ -47,11 +47,11 @@ export class SignalingServer {
     );
   }
 
-  private handleWebSocketMessage = (socket: WebSocket, message: any) => {
+  private handleWebSocketMessage = (socket: WebSocket, message: unknown) => {
     this.broadcastMessage(socket, message);
   };
 
-  private broadcastMessage = (senderSocket: WebSocket, message: any) => {
+  private broadcastMessage = (senderSocket: WebSocket, message: unknown) => {
     this.clients.forEach((_, socket) => {
       if (socket !== senderSocket && socket.readyState === WebSocket.OPEN) {
         //throw new Error(`${JSON.stringify(message)}`);

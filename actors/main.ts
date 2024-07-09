@@ -1,15 +1,12 @@
 import {
   ActorFunctions,
   BaseState,
-  Message,
   Payload,
-  System,
   worker,
 } from "../actorsystem/types.ts";
-import { OnMessage, Postman, trpc } from "../classes/PostMan.ts";
+import { OnMessage, Postman } from "../classes/PostMan.ts";
 import { wait } from "../actorsystem/utils.ts";
-import { WebRTCServer } from "../classes/webrtcClass.ts";
-import { PostalService } from "../actorsystem/PostalService.ts";
+
 
 
 type State = {
@@ -45,7 +42,7 @@ async function main(_payload: Payload["MAIN"]) {
   const remoteid = await Postman.create(worker, "subactor.ts", state);
 
   // create rtc socket on self
-  Postman.functions?.RTC?.(null);
+  Postman.functions?.RTC?.(null, state.id);
 
   // tell subactor to create rtc socket
   Postman.PostMessage(worker, {
@@ -56,7 +53,7 @@ async function main(_payload: Payload["MAIN"]) {
   await wait(3000);
 
   // connect to subactor
-  Postman.functions?.CONNECT?.(remoteid);
+  Postman.functions?.CONNECT?.(remoteid, state.id);
   await wait(10000);
 
   // tell subactor to log

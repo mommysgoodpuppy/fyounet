@@ -183,13 +183,13 @@ function queryDataPeers(CallbackReturnAddress: string, targetPeerId: string) {
       rtcmessage: true,
     }));
   } else {
+    console.log(
+      `Dataxxx channel not open with ${targetPeerId}. return false`,
+    );
     wsIPC.send(JSON.stringify({
       type: "query_dataPeersReturn",
       targetPeerId: CallbackReturnAddress,
       rtcmessage: false,
     }));
-    console.log(
-      `Dataxxx channel not open with ${targetPeerId}. Cannot send message.`,
-    );
   }
 }

@@ -7,6 +7,8 @@ const postalservice = new PostalService();
 
 const mainAddress = await postalservice.add("mainTest.ts");
 
+console.log("mainAddress", mainAddress);
+
 postalservice.Post({
   address: { fm: "system", to: mainAddress },
   type: "MAIN",

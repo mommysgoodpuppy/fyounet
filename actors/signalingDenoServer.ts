@@ -14,7 +14,7 @@ const state: BaseState = {
 
 const functions: ActorFunctions = {
   CUSTOMINIT: (_payload) => {
-    Postman.functions?.STARTSERVER?.(8081);
+    Postman.functions?.STARTSERVER?.(8081, state.id);
   },
   STARTSERVER: (payload) => {
     const signalingServer = new SignalingServer(payload);

@@ -1,4 +1,4 @@
-import { getIP } from "https://deno.land/x/get_ip/mod.ts";
+import { getIP } from "https://deno.land/x/get_ip@v2.0.0/mod.ts";
 
 export class WebRTCServer {
   private nodeSocket: WebSocket | null = null;
@@ -70,8 +70,8 @@ export class WebRTCServer {
         const prefixedLines = nonEmptyLines.map((line) =>
           `[RTC NODE: ${idPartBeforeAt}]: ${line}`
         );
-        const formattedOutput = prefixedLines.join("\n");
-        console.log(formattedOutput);
+        const _formattedOutput = prefixedLines.join("\n");
+        //console.log(formattedOutput);
       }
     };
 
@@ -100,7 +100,7 @@ export class WebRTCServer {
         } else if (data.type === "portalSet") {
           this.ipcSockets.set(data.payload, socket);
         } else if (data.type === "query_dataPeersReturn") {
-          if (data.rtcmessage) {
+          if (typeof data.rtcmessage === "boolean") {
             try {
               this.ipcSockets.get(data.targetPeerId)?.send(JSON.stringify({
                 type: "query_dataPeers",
@@ -109,6 +109,10 @@ export class WebRTCServer {
             } catch (e) {
               console.log("error sending query_dataPeers", e);
             }
+            console.log("sent query_dataPeers");
+          }
+          else {
+            console.error("unknown query_dataPeersReturn type", data);
           }
         } else if (data.type === "webrtc_message_custom") {
           console.log("received custom webrtc message");

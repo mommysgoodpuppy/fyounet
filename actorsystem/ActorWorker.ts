@@ -3,7 +3,6 @@ import {
     MessageAddressReal,
     System,
     ToAddress,
-    worker,
 } from "./types.ts";
 import { PostalService } from "./PostalService.ts";
 import { Signal } from "./utils.ts";
@@ -21,9 +20,6 @@ export class ActorWorker extends Worker {
         message: Message,
         transferOrOptions?: Transferable[] | StructuredSerializeOptions,
     ): void {
-        /* message.address = JSON.stringify(
-            message.address,
-        ) as unknown as MessageAddressReal; */
 
         const address = message.address as MessageAddressReal;
 

@@ -1,13 +1,13 @@
 import {
   ActorFunctions,
   BaseState,
-  Message,
-  Payload,
+
   worker,
+  MessageAddressReal,
 } from "../actorsystem/types.ts";
-import { wait } from "../actorsystem/utils.ts";
-import { OnMessage, Postman, trpc } from "../classes/PostMan.ts";
-import { WebRTCServer } from "../classes/webrtcClass.ts";
+
+import { OnMessage, Postman } from "../classes/PostMan.ts";
+
 
 
 type State = {
@@ -32,9 +32,18 @@ const functions: ActorFunctions = {
   LOG: (_payload) => {
     console.log(state.id);
   },
+  GETID: (_payload, address) => {
+    // use a check here
+    const addr = address as MessageAddressReal;
+    Postman.PostMessage(worker, {
+      address: { fm: state.id, to: addr.fm },
+      type: "CB:GETID",
+      payload: state.id,
+    }, false);
+  },
 };
 function rtc() {
-  Postman.functions?.RTC?.(null);
+  Postman.functions?.RTC?.(null, state.id);
 }
 
 new Postman(worker, functions, state);

@@ -1,10 +1,10 @@
-import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
-import { type } from "arktype";
+
 import { Signal } from "../actorsystem/utils.ts";
 import {
   ActorFunctions,
   BaseState,
   Message,
+  MessageAddressReal,
   notAddressArray,
   Payload,
   PayloadHandler,
@@ -15,16 +15,9 @@ import {
 import { ActorWorker } from "../actorsystem/ActorWorker.ts";
 import { wait } from "../actorsystem/utils.ts";
 import { WebRTCServer } from "./webrtcClass.ts";
-import type { AppRouter } from "../actorsystem/router.ts";
 import { getAvailablePort } from "jsr:@std/net";
 
-export const trpc = createTRPCProxyClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: "http://localhost:8080/trpc",
-    }),
-  ],
-});
+
 export const OnMessage = (handler: (message: Message) => void) => {
   worker.onmessage = (event: MessageEvent) => {
     const message = event.data as Message;
@@ -36,7 +29,8 @@ export class Postman {
   static worker: ActorWorker;
   static state: BaseState;
   static creationSignal: Signal<ToAddress>;
-  static callbackSignal: Signal<any>;
+  static portalCheckSignal: Signal<boolean>;
+  static customCB: Signal<unknown>;
   static portals: Array<ToAddress>;
 
   public static functions: ActorFunctions = {
@@ -48,8 +42,8 @@ export class Postman {
         type: "LOADED",
         payload: Postman.state.id,
       });
-      Postman.functions.CUSTOMINIT?.(null);
-      console.log("initied sub actor with args:", payload);
+      Postman.functions.CUSTOMINIT?.(null, Postman.state.id);
+      console.log(`initied ${Postman.state.id} actor with args:`, payload);
     },
 
     //register self to system
@@ -65,14 +59,17 @@ export class Postman {
 
     RTC: async (_payload) => {
       console.log("creating rtc socket");
-      const socket = await Postman.creatertcsocket();
+      const _socket = await Postman.creatertcsocket();
     },
 
-    CONNECT: async (payload) => {
+    CONNECT: (payload) => {
       Postman.state.socket?.send(JSON.stringify({
         type: "create_offer",
         targetPeerId: payload,
       }));
+    },
+    CB: (payload) => {
+      Postman.customCB.trigger(payload);
     },
   };
 
@@ -87,7 +84,7 @@ export class Postman {
 
   static runFunctions(message: Message) {
     if (notAddressArray(message.address)) {
-      const address = message.address;
+      const address = message.address as MessageAddressReal;
       console.log(
         `[${address.to}]Actor running function, type: ${message.type}, payload: ${message.payload}`,
       );
@@ -102,35 +99,50 @@ export class Postman {
   static async PostMessage(
     worker: ActorWorker,
     message: Message,
-    tryrtc?: boolean,
-  ) {
-    if (tryrtc) {
-      if (
-        Postman.state.socket &&
-        Postman.state.socket !== null &&
-        Postman.state.socket.readyState === WebSocket.OPEN
-      ) {
-        //check portal
+    cb?: boolean,
+  ): Promise<unknown | undefined> {
+    if (cb) {
+      console.log("cb enabled");
+      Postman.customCB = new Signal<unknown>();
+      Postman.posterr(worker, message);
+      const result = await Postman.customCB.wait();
+      return result;
+    } //use return false if fail to send msg for some reason
+    else {
+      Postman.posterr(worker, message);
+    }
+  }
 
-        Postman.callbackSignal = new Signal<boolean>();
+  static async posterr(worker: ActorWorker, message: Message) {
+    console.log("use rtc",message);
+    if (
+      Postman.state.socket &&
+      Postman.state.socket !== null &&
+      Postman.state.socket.readyState === WebSocket.OPEN
+    ) {
+      //check portal
+
+      Postman.portalCheckSignal = new Signal<boolean>();
+      Postman.state.socket.send(JSON.stringify({
+        type: "query_dataPeers",
+        from: Postman.state.id,
+        targetPeerId: message.address.to,
+      }));
+      console.log("wait");
+      const result: boolean = await Postman.portalCheckSignal.wait();
+      if (result) {
+        console.log("wat");
         Postman.state.socket.send(JSON.stringify({
-          type: "query_dataPeers",
-          from: Postman.state.id,
+          type: "send_message",
           targetPeerId: message.address.to,
+          payload: message,
         }));
-        const result: boolean = await Postman.callbackSignal.wait();
-        if (result) {
-          Postman.state.socket.send(JSON.stringify({
-            type: "send_message",
-            targetPeerId: message.address.to,
-            payload: message,
-          }));
-        } else {
-          console.error("trough rtc failed, trying locally");
-          worker.postMessage(message);
-        }
+      } else {
+        console.error("trough rtc failed, trying locally");
+        worker.postMessage(message);
       }
-    } else {
+    }
+    else {
       worker.postMessage(message);
     }
   }
@@ -184,7 +196,7 @@ export class Postman {
         }
       } else if (data.type === "query_dataPeers") {
         const message = JSON.parse(data.rtcmessage);
-        Postman.callbackSignal.trigger(message);
+        Postman.portalCheckSignal.trigger(message);
         console.log("got message", message);
       }
     });
