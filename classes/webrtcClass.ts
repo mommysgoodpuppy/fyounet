@@ -70,8 +70,8 @@ export class WebRTCServer {
         const prefixedLines = nonEmptyLines.map((line) =>
           `[RTC NODE: ${idPartBeforeAt}]: ${line}`
         );
-        const _formattedOutput = prefixedLines.join("\n");
-        //console.log(formattedOutput);
+        const formattedOutput = prefixedLines.join("\n");
+        console.log(formattedOutput);
       }
     };
 
@@ -127,6 +127,7 @@ export class WebRTCServer {
             this.ipcSockets.get(to)?.send(JSON.stringify(data));
           }
         } else {
+          console.log("sending webrtc message to node socket");
           this.nodeSocket?.send(JSON.stringify(data));
         }
       });

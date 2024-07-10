@@ -37,8 +37,10 @@ wsSignaling.on("message", (message) => {
 });
 
 function handleIPCMessage(data: any) {
+  console.log("handleIPCMessage", data);
   switch (data.type) {
     case "create_offer":
+      console.log("create_offer");
       createOffer(data.targetPeerId);
       break;
     case "send_message":
@@ -95,9 +97,24 @@ async function handleSignalingMessage(data: any) {
 }
 
 function createPeerConnection(targetPeerId: string) {
-  const peerConnection = new wrtc.RTCPeerConnection();
+  const configuration = {
+    iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' }, // Google's public STUN server
+      // Add TURN server configuration here if needed
+    ]
+  };
+  const peerConnection = new wrtc.RTCPeerConnection(configuration);
+
+  peerConnection.oniceconnectionstatechange = () => {
+    console.log("ICE connection state changed to:", peerConnection.iceConnectionState);
+  };
+
+  peerConnection.onsignalingstatechange = () => {
+    console.log("Signaling state changed to:", peerConnection.signalingState);
+  };
 
   peerConnection.onicecandidate = (event) => {
+    console.log("ICE candidate", event.candidate);
     if (event.candidate) {
       wsSignaling.send(JSON.stringify({
         to: targetPeerId,
@@ -109,6 +126,7 @@ function createPeerConnection(targetPeerId: string) {
   };
 
   peerConnection.ondatachannel = (event: wrtc.RTCDataChannelEvent) => {
+    console.log("ondatachannel event fired", event);
     setupDataChannel(targetPeerId, event.channel);
   };
   console.log("Created peer connection");
@@ -117,10 +135,23 @@ function createPeerConnection(targetPeerId: string) {
 }
 
 function setupDataChannel(targetPeerId: string, channel: wrtc.RTCDataChannel) {
+
+  console.log(`Setting up data channel for peer ${targetPeerId}`);
+  
   channel.onopen = () => {
-    console.log(`Data channel is open with peer ${targetPeerId}`);
+    console.log(`Data channel opened with peer ${targetPeerId}`);
     sendMessage(targetPeerId, "Hello");
   };
+
+  channel.onclose = () => {
+    console.log(`Data channel closed with peer ${targetPeerId}`);
+  };
+
+  channel.onerror = (error) => {
+    console.error(`Data channel error with peer ${targetPeerId}:`, error);
+  };
+
+
 
   channel.onmessage = (event: MessageEvent) => {
     const eventData = JSON.parse(event.data);
@@ -146,6 +177,10 @@ async function createOffer(targetPeerId: string) {
     console.log(`Creating offer for peer ${targetPeerId}`);
     const peerConnection = createPeerConnection(targetPeerId);
     const dataChannel = peerConnection.createDataChannel("chat");
+    console.log("Data channel initial state:", dataChannel.readyState);
+    dataChannel.onopen = () => {
+      console.log("Data channel state changed to:", dataChannel.readyState);
+    };
     setupDataChannel(targetPeerId, dataChannel);
 
     const offer = await peerConnection.createOffer();

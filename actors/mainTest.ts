@@ -47,7 +47,7 @@ const functions: ActorFunctions = {
         address: { fm: state.id, to: address },
         type: type,
         payload: payload2,
-      }, true);
+      });
     } else {
       const vmessage = payload.split(":");
       const type = vmessage[0] as keyof ActorFunctions;
@@ -79,56 +79,10 @@ async function main(_payload: Payload["MAIN"]) {
   // create rtc socket on self
   Postman.functions?.RTC?.(null, state.id);
 
-  const portal = await Postman.create(worker, "portal.ts", state);
-  state.portal = portal;
-  const portal2 = await Postman.create(worker, "portal.ts", state);
-  const remoteid = await Postman.create(worker, "subactor.ts", state);
-
-  await wait(3000);
-
-  Postman.PostMessage(worker, {
-    address: { fm: state.id, to: portal },
-    type: "PREGISTER",
-    payload: {
-      name: "self:Ellie",
-      address: state.id,
-    },
-  });
-
-  await wait(1000);
-
-  Postman.PostMessage(worker, {
-    address: { fm: remoteid, to: portal2 },
-    type: "PREGISTER",
-    payload: {
-      name: "self:Teaqu",
-      address: remoteid,
-    },
-  });
-
-  await wait(1000);
-
-
 
   
 
-  const all = await Postman.PostMessage(worker, {
-    address: { fm: state.id, to: portal },
-    type: "GET_ALL",
-    payload: null,
-  }, true);
-  console.log("all", all);
 
-  const all2 = await Postman.PostMessage(worker, {
-    address: { fm: state.id, to: portal2 },
-    type: "GET_ALL",
-    payload: null,
-  }, true);
-  console.log("all2", all2);
-
-  Postman.functions?.CONNECT?.()
-
-  await wait(10000);
 }
 
 new Postman(worker, functions, state);
