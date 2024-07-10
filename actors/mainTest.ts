@@ -106,12 +106,27 @@ async function main(_payload: Payload["MAIN"]) {
     },
   });
 
+  await wait(1000);
+
+
+
+  
+
   const all = await Postman.PostMessage(worker, {
     address: { fm: state.id, to: portal },
     type: "GET_ALL",
     payload: null,
   }, true);
   console.log("all", all);
+
+  const all2 = await Postman.PostMessage(worker, {
+    address: { fm: state.id, to: portal2 },
+    type: "GET_ALL",
+    payload: null,
+  }, true);
+  console.log("all2", all2);
+
+  Postman.functions?.CONNECT?.()
 
   await wait(10000);
 }

@@ -68,7 +68,7 @@ export class PostalService {
       }
 
       const address: nonArrayAddress = message.address as nonArrayAddress;
-      console.log("postalService handleMessage", message);
+      console.log("postalService handleMessage", message.type);
       // redirect message
       switch (address.to) {
         case null:

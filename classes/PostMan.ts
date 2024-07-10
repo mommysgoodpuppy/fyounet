@@ -86,7 +86,7 @@ export class Postman {
     if (notAddressArray(message.address)) {
       const address = message.address as MessageAddressReal;
       console.log(
-        `[${address.to}]Actor running function, type: ${message.type}, payload: ${message.payload}`,
+        `[${address.to}]Actor running function, type: ${message.type}, payload: ${JSON.stringify(message.payload)}`,
       );
 
       (this.functions[message.type] as PayloadHandler<typeof message.type>)?.(
@@ -114,7 +114,6 @@ export class Postman {
   }
 
   static async posterr(worker: ActorWorker, message: Message) {
-    console.log("use rtc",message);
     if (
       Postman.state.socket &&
       Postman.state.socket !== null &&
@@ -128,7 +127,6 @@ export class Postman {
         from: Postman.state.id,
         targetPeerId: message.address.to,
       }));
-      console.log("wait");
       const result: boolean = await Postman.portalCheckSignal.wait();
       if (result) {
         console.log("wat");
@@ -197,7 +195,6 @@ export class Postman {
       } else if (data.type === "query_dataPeers") {
         const message = JSON.parse(data.rtcmessage);
         Postman.portalCheckSignal.trigger(message);
-        console.log("got message", message);
       }
     });
     while (socket.readyState !== WebSocket.OPEN) {

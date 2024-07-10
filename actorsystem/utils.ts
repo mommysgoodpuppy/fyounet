@@ -18,7 +18,7 @@ export class Signal<T> {
 
   trigger(value: T): void {
     if (this.resolve) {
-      console.log("signal triggered with", value);
+      console.log("signal triggered");
       this.resolve(value);
     }
   }
